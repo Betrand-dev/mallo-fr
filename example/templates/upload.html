@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload</title>
+  <link rel="stylesheet" href="/static/showcase.css" />
+</head>
+<body>
+  <div class="page">
+    <section class="card">
+      <h2>Upload Demo</h2>
+      <form method="post" action="/upload" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label>
+          Notes
+          <input type="text" name="notes" placeholder="A short note" />
+        </label>
+        <label>
+          File
+          <input type="file" name="file" />
+        </label>
+        <button class="btn" type="submit">Upload</button>
+      </form>
+    </section>
+  </div>
+</body>
+</html>

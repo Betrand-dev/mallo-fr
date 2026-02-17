@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mallo Showcase</title>
+  <link rel="stylesheet" href="/static/showcase.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>Mallo Showcase</h1>
+      {% if show_note %}<p>Demo app for the latest framework features.</p>{% endif %}
+      <p>{{ note | safe }}</p>
+    </header>
+
+    <section class="card">
+      <h2>Quick Form</h2>
+      <form method="post" action="/submit">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label>
+          Your name
+          <input type="text" name="name" placeholder="Jane Doe" required />
+        </label>
+        <button class="btn" type="submit">Go to profile</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Features List</h2>
+      <ul>
+        {% for item in items %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Other Routes</h2>
+      <p><a href="/api/ping">/api/ping</a> returns JSON</p>
+      <p><a href="/upload">/upload</a> multipart upload demo</p>
+    </section>
+  </div>
+</body>
+</html>

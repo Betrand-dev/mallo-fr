@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Result</title>
+  <link rel="stylesheet" href="/static/showcase.css" />
+</head>
+<body>
+  <div class="page">
+    <section class="card">
+      <h2>Upload Result</h2>
+      <p>Has file: <strong>{{ has_file }}</strong></p>
+      <p>Filename: <strong>{{ filename }}</strong></p>
+      <p>Content type: <strong>{{ content_type }}</strong></p>
+      <p>Notes: <strong>{{ notes }}</strong></p>
+      <p>Last upload in session: <strong>{{ last_upload }}</strong></p>
+      <a class="btn" href="/upload">Try another</a>
+    </section>
+  </div>
+</body>
+</html>
