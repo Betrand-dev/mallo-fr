@@ -4,6 +4,11 @@ Lightweight web framework with hot reload and a tiny core.
 
 Docs index: `docs/index.md`
 
+**Install (from PyPI)**
+```powershell
+pip install mallo
+```
+
 **Install (from source)**
 ```powershell
 pip install -e .
