@@ -12,7 +12,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="mallo",
-    version="0.2.0a1",
+    version="0.3.0a3",
     author="Akum betrand",
     author_email="betrandojong146@gmail.com",
     description="A lightweight web framework with hot reload",
@@ -31,7 +31,6 @@ setup(
         "Programming Language :: Python :: 3.12",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Framework :: Web",
         "Topic :: Internet :: WWW/HTTP :: WSGI",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     ],
