@@ -8,5 +8,5 @@ from mallo.response import Response
 from mallo.cli import cli
 from mallo.template import render_template, render_template_file
 
-__version__ = "0.3.0a5"
+__version__ = "0.3.0a5.1"
 __all__ = ['Mallo', 'Request', 'Response', 'cli', 'render_template', 'render_template_file' ]

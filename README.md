@@ -10,8 +10,13 @@ Install from PyPI:
 pip install mallo
 ```
 
+Recommended after install try mallo cli:
 
-
+```bash
+mallo create myapp
+cd myapp
+python app.py
+```
 
 ## Quick Start
 

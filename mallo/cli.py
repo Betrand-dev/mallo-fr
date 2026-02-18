@@ -25,13 +25,13 @@ def create_project(name):
 Mallo application
 """
 
-from mallo import Mallo
+from mallo import Mallo, render_template
 
 app = Mallo(__name__)
 
 @app.route('/')
 def home(request):
-    return app.render_template('templates/index.html', name='Mallo User')
+    return render_template('index.html')
 
 @app.route('/hello/<name>')
 def hello(request, name):
@@ -53,7 +53,6 @@ if __name__ == '__main__':
     <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mallo Framework</title>
   <style>
