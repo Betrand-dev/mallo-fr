@@ -153,6 +153,34 @@ class TemplateEngine:
 # Global template engine instance
 _engine = TemplateEngine()
 
+def render_template(
+    template_name: str,
+    template_folder: str = 'templates',
+    auto_reload: bool = False,
+    auto_escape: bool = True,
+    **context
+) -> str:
+    """
+    Render a template from the configured template folder.
+
+    Args:
+        template_name: Template name relative to template_folder (e.g. "index.html")
+        template_folder: Folder that contains templates (default: "templates")
+        auto_reload: Reload template file when changed
+        auto_escape: Escape variables by default
+        **context: Context variables for rendering
+    """
+    if not os.path.isdir(template_folder):
+        return f"<h1>Template folder not found</h1><p>{template_folder}</p>"
+
+    template_path = os.path.join(template_folder, template_name)
+    return render_template_file(
+        template_path,
+        auto_reload=auto_reload,
+        auto_escape=auto_escape,
+        **context
+    )
+
 def render_template_file(template_path: str, auto_reload: bool = False, auto_escape: bool = True, **context)->str:
     """
     Render a template from file path with context

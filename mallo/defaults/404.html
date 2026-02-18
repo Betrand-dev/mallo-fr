@@ -3,59 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Page Not Found</title>
+  <title>Mallo • 404 Not Found</title>
   <style>
     :root {
-      --bg: #0e1116;
-      --card: #141a22;
-      --ink: #f2f4f8;
-      --muted: #98a2b3;
-      --accent: #ff9a62;
+      --bg: #f8f5ef;
+      --paper: #fffdf9;
+      --ink: #19140f;
+      --muted: #695d4f;
+      --accent: #bb5a1d;
+      --line: #e6dccd;
+      --shadow: 0 30px 70px rgba(35, 23, 12, 0.16);
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: radial-gradient(900px 500px at 20% 10%, #1b2230 0%, rgba(27, 34, 48, 0) 60%), var(--bg);
-      color: var(--ink);
+      font-family: "Outfit", "Segoe UI", sans-serif;
       min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
+      color: var(--ink);
+      background:
+        radial-gradient(1100px 550px at 8% 4%, #efe4d3 0%, rgba(239, 228, 211, 0) 62%),
+        radial-gradient(900px 500px at 92% 2%, #e1efec 0%, rgba(225, 239, 236, 0) 56%),
+        var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
     }
+
     .card {
-      max-width: 640px;
+      max-width: 760px;
       width: 100%;
-      background: var(--card);
-      border-radius: 18px;
-      padding: 28px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
     }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      right: -70px;
+      top: -70px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(187, 90, 29, 0.18) 0%, rgba(187, 90, 29, 0) 72%);
+      pointer-events: none;
+    }
+
+    .brand {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
     .badge {
       display: inline-block;
-      padding: 6px 10px;
+      padding: 7px 11px;
       border-radius: 999px;
-      background: rgba(255, 154, 98, 0.15);
+      background: rgba(187, 90, 29, 0.13);
       color: var(--accent);
       font-weight: 600;
       letter-spacing: 0.03em;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
-    h1 { margin: 0 0 10px; font-size: 2.2rem; }
-    p { margin: 0 0 16px; color: var(--muted); }
-    a {
-      color: var(--accent);
+
+    .error-code {
+      margin: 0;
+      font-size: clamp(5rem, 18vw, 11rem);
+      line-height: 0.9;
+      letter-spacing: 0.04em;
+      font-weight: 800;
+      color: rgba(187, 90, 29, 0.14);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 6px 0 10px;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.05;
+      max-width: 600px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 640px;
+      font-size: 1rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+
+    a.btn {
       text-decoration: none;
+      display: inline-block;
+      border-radius: 11px;
+      padding: 10px 15px;
       font-weight: 600;
+      transition: transform 130ms ease;
+    }
+
+    a.btn:hover {
+      transform: translateY(-1px);
+    }
+
+    a.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    a.ghost {
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #fff;
+    }
+
+    @media (max-width: 620px) {
+      .card {
+        padding: 24px;
+      }
     }
   </style>
 </head>
 <body>
   <main class="card">
+    <div class="brand">Mallo Framework</div>
     <div class="badge">404</div>
+    <p class="error-code">404</p>
     <h1>Page not found</h1>
-    <p>The page you were looking for doesn’t exist or was moved.</p>
-    <p><a href="/">Go back home</a></p>
+    <p>The page you requested does not exist or has been moved to a new route.</p>
+    <div class="actions">
+      <a class="btn primary" href="/">Go to home</a>
+      <a class="btn ghost" href="https://github.com/Betrand-dev/mallo-fr.git" target="_blank" rel="noreferrer">Open repository</a>
+    </div>
   </main>
 </body>
 </html>

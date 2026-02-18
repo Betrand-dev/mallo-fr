@@ -14,7 +14,7 @@ from wsgiref.simple_server import make_server, WSGIRequestHandler
 from mallo.router import Router
 from mallo.request import Request
 from mallo.response import Response
-from mallo.template import render_template_file
+from mallo.template import render_template, render_template_file
 from mallo.utils import generate_etag
 from mallo.hot_reload import HotReloader
 
@@ -146,12 +146,12 @@ class Mallo:
         """
         return self.route(path, methods=['DELETE'])
 
-    def render_template(self, template_path, **context):
+    def render_template(self, template_name, **context):
         """
         Render a template from any file path
 
         Args:
-            template_path: path to template file (absolute or relative)
+            template_name: template file name relative to template folder
             **context: Variable to pass to template
 
         Returns:
@@ -160,15 +160,22 @@ class Mallo:
         Example:
           @app.route('/')
           def home(request):
-              return app.render_template('templates/home.html', name = 'Mallo User')
+              return app.render_template('home.html', name='Mallo User')
 
 
-        :param template_path:
+        :param template_name:
         :param context:
         :return:
         """
         auto_escape = self.config.get('auto_escape', True)
-        return render_template_file(template_path, auto_reload=self.debug, auto_escape=auto_escape, **context)
+        template_folder = self.config.get('template_folder', 'templates')
+        return render_template(
+            template_name,
+            template_folder=template_folder,
+            auto_reload=self.debug,
+            auto_escape=auto_escape,
+            **context
+        )
 
     def before_request(self, func):
         self.before_request_funcs.append(func)
