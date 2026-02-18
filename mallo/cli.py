@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     # Create index.html
     index_content = '''
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
