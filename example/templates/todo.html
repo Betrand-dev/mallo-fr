@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mallo Todo App</title>
+  <link rel="stylesheet" href="/static/todo.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <p class="brand">Mallo Example</p>
+      <h1>Todo List</h1>
+      <p class="lead">A basic todo app built with Mallo routes, templates, sessions, and CSRF-safe forms.</p>
+    </header>
+
+    <section class="card">
+      <form class="add-form" method="post" action="/add">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <input type="text" name="title" placeholder="Add a task..." required />
+        <button type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="card">
+      {% if todos %}
+      <ul class="todos">
+        {% for todo in todos %}
+        <li class="todo {% if todo.done %}done{% endif %}">
+          <form method="post" action="/toggle/{{ todo.id }}" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <button class="toggle" type="submit">{% if todo.done %}Undo{% endif %}{% if not todo.done %}Done{% endif %}</button>
+          </form>
+
+          <span class="title">{{ todo.title }}</span>
+
+          <form method="post" action="/delete/{{ todo.id }}" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <button class="delete" type="submit">Delete</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% if not todos %}
+      <p class="empty">No tasks yet. Add your first todo.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

@@ -27,7 +27,11 @@ class TemplateEngine:
         :return:
         """
         if not os.path.exists(template_path):
-            return f"<h1>Template not found</h1><p>{template_path}</p>"
+            return _template_error_page(
+                "Template not found",
+                "Mallo could not find the template file.",
+                template_path
+            )
 
         current_mtime = os.path.getmtime(template_path)
         cached = self.cache.get(template_path)
@@ -43,7 +47,14 @@ class TemplateEngine:
             }
 
         # Render the template
-        return self._render_string(template, context, auto_escape=auto_escape)
+        try:
+            return self._render_string(template, context, auto_escape=auto_escape)
+        except Exception as exc:
+            return _template_error_page(
+                "Template render error",
+                "Mallo failed while rendering this template.",
+                f"{template_path}\n{type(exc).__name__}: {exc}"
+            )
 
     def _render_string(self, template: str, context: Dict[str, Any], auto_escape: bool = True) -> str:
         """
@@ -153,6 +164,40 @@ class TemplateEngine:
 # Global template engine instance
 _engine = TemplateEngine()
 
+def _template_error_page(title: str, message: str, detail: str = "") -> str:
+    safe_title = html.escape(title)
+    safe_message = html.escape(message)
+    safe_detail = html.escape(detail)
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mallo Template Error</title>
+  <style>
+    body {{ margin: 0; font-family: Segoe UI, Arial, sans-serif; background: #f6f3ee; color: #1f1a15; }}
+    .wrap {{ max-width: 760px; margin: 28px auto; padding: 0 16px; }}
+    .card {{ background: #fffdf9; border: 1px solid #e8dece; border-radius: 14px; padding: 18px; }}
+    .tag {{ display: inline-block; border-radius: 999px; padding: 4px 10px; background: #f8e8de; color: #b6521a; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }}
+    h1 {{ margin: 10px 0 8px; font-size: 26px; }}
+    p {{ margin: 0 0 10px; color: #5f5549; }}
+    pre {{ margin: 0; background: #1a1f29; color: #eaf0ff; border-radius: 10px; padding: 12px; white-space: pre-wrap; word-break: break-word; }}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <span class="tag">Template Error</span>
+      <h1>{safe_title}</h1>
+      <p>{safe_message}</p>
+      <pre>{safe_detail}</pre>
+    </div>
+  </div>
+</body>
+</html>
+"""
+
 def render_template(
     template_name: str,
     template_folder: str = 'templates',
@@ -171,7 +216,11 @@ def render_template(
         **context: Context variables for rendering
     """
     if not os.path.isdir(template_folder):
-        return f"<h1>Template folder not found</h1><p>{template_folder}</p>"
+        return _template_error_page(
+            "Template folder not found",
+            "Mallo expected a template folder but it does not exist.",
+            template_folder
+        )
 
     template_path = os.path.join(template_folder, template_name)
     return render_template_file(

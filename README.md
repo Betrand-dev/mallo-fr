@@ -1,6 +1,6 @@
 # Mallo
 
-Lightweight Python web framework with a small core, built-in live reload, templates, routing, static files, and customizable error pages.
+Lightweight Customizable Python web framework with a small core, built-in live reload, templates, routing, static files, and customizable error pages.
 
 ## Installation
 
@@ -42,6 +42,46 @@ python app.py
 ```
 
 Open `http://localhost:8000`.
+
+---
+
+## Config Object and Env Overrides
+
+Mallo now resolves app settings through `MalloConfig` (defaults + environment + constructor overrides).
+
+```python
+from mallo import Mallo
+
+app = Mallo(
+    __name__,
+    template_folder='views',
+    static_folder='assets',
+    debug=True,
+)
+```
+
+Environment variables (examples):
+
+```bash
+MALLO_DEBUG=1
+MALLO_TEMPLATE_FOLDER=views
+MALLO_STATIC_FOLDER=assets
+MALLO_CSRF_PROTECT=0
+MALLO_SECURITY_HEADERS=1
+```
+
+Precedence:
+
+1. Explicit `Mallo(...)` arguments
+2. Environment variables
+3. Framework defaults
+
+Read resolved config:
+
+```python
+print(app.config_obj.get('template_folder'))
+print(app.config_obj.as_dict())
+```
 
 ---
 
@@ -181,6 +221,62 @@ Generate routes by handler name:
 profile_url = app.url_for('user', id=10)  # /user/10
 ```
 
+### Route Prefix Groups
+
+Group routes under a shared prefix and middleware/default options:
+
+```python
+api = app.group('/api')
+
+@api.get('/users')
+def users(request):
+    return {'ok': True}
+```
+
+With group middleware:
+
+```python
+def api_mw(request, call_next):
+    response = call_next(request)
+    response.headers['X-API'] = '1'
+    return response
+
+api = app.group('/api', middleware=[api_mw])
+```
+
+---
+
+## Per-Route Config
+
+Routes can define specific options:
+
+```python
+@app.post('/webhook', csrf=False)
+def webhook(request):
+    return 'ok'
+```
+
+Available per-route options:
+
+- `name='route_name'` for `app.url_for(...)`
+- `middleware=[...]` route-specific middleware list
+- `csrf=False` to disable CSRF for that route
+
+Example:
+
+```python
+def audit_mw(request, call_next):
+    response = call_next(request)
+    response.headers['X-Audit'] = 'on'
+    return response
+
+@app.get('/profile/<int:id>', name='profile_show', middleware=[audit_mw])
+def profile(request, id):
+    return f'profile {id}'
+
+url = app.url_for('profile_show', id=10)  # /profile/10
+```
+
 ---
 
 ## Request Data
@@ -280,6 +376,61 @@ Or send token in header `X-Csrf-Token`.
 
 ---
 
+## Database (SQLAlchemy Core)
+
+Mallo now supports database integration via SQLAlchemy Core.
+
+```python
+from mallo import Mallo, Database
+
+app = Mallo(__name__)
+db = Database("sqlite:///app.db")
+app.init_db(db)  # request.db is now available in handlers
+```
+
+Basic operations:
+
+```python
+@app.post('/users')
+def create_user(request):
+    request.db.execute(
+        "INSERT INTO users (name) VALUES (:name)",
+        {"name": "Betrand"}
+    )
+    return {"ok": True}
+
+@app.get('/users')
+def list_users(request):
+    rows = request.db.fetchall("SELECT id, name FROM users ORDER BY id DESC")
+    return {"users": rows}
+```
+
+Available DB methods:
+
+- `execute(sql, params=None)` for write/update/delete
+- `fetchone(sql, params=None)` returns one row as dict or `None`
+- `fetchall(sql, params=None)` returns list of dict rows
+- `transaction()` context manager
+- `close()` to dispose the engine
+
+Transaction example:
+
+```python
+from sqlalchemy import text
+
+with db.transaction() as conn:
+    conn.execute(
+        text("INSERT INTO logs (message) VALUES (:msg)"),
+        {"msg": "started"}
+    )
+```
+
+See runnable example:
+
+- `example/db_demo.py`
+
+---
+
 ## Static Files
 
 If `static/` exists, files are served at `/static/...`.
@@ -330,6 +481,12 @@ def server_error(request):
 
 Custom handler takes precedence over `error_page_404` / `error_page_500`.
 
+Debug-mode errors are also shown using a friendly error screen:
+
+- clear error type + message
+- traceback hidden behind an expandable details block
+- non-overwhelming layout for faster debugging
+
 ---
 
 ## Request Hooks
@@ -347,12 +504,73 @@ def after(request, response):
 
 ---
 
+## Middleware
+
+Mallo supports middleware with this signature:
+
+`middleware(request, call_next) -> Response|str|dict|list`
+
+Decorator style:
+
+```python
+@app.middleware
+def timing_middleware(request, call_next):
+    response = call_next(request)
+    response.headers['X-App'] = 'Mallo'
+    return response
+```
+
+Function style:
+
+```python
+def auth_middleware(request, call_next):
+    if request.path.startswith('/admin'):
+        return 'Unauthorized'
+    return call_next(request)
+
+app.use(auth_middleware)
+```
+
+Execution order:
+
+1. `before_request` hooks
+2. global middleware chain (`@app.middleware`, `app.use`)
+3. route-specific middleware (`middleware=[...]` or group middleware)
+4. route handler
+5. `after_request` hooks
+
+---
+
+## Developer Diagnostics
+
+In debug mode, Mallo shows startup diagnostics when no user routes are registered.
+
+This helps catch common mistakes early, such as:
+
+- missing `@` before route decorators
+- route module not imported before `app.run()`
+- route code path not executed
+
+---
+
 ## CLI
 
 Create project:
 
 ```bash
 mallo create myapp
+```
+
+Create with custom folders:
+
+```bash
+mallo create myapp --template-folder views --static-folder assets
+```
+
+Overwrite scaffold files if needed:
+
+```bash
+mallo create myapp --force
 ```
 
 Run with gunicorn (Linux/macOS):
@@ -370,6 +588,7 @@ mallo run app:app --host 0.0.0.0 --port 9000 --no-debug --no-reload
 Notes:
 - Defaults: host `localhost`, port `8000`, debug `on`.
 - On Windows, `mallo run` prints a gunicorn support warning. Use `python app.py`.
+- `mallo create` returns clear errors for invalid project names, non-empty folders, and file overwrite conflicts.
 
 ---
 
@@ -406,9 +625,36 @@ Repository:
 
 `https://github.com/Betrand-dev/mallo-fr.git`
 
-Contributions are welcome for:
-- testing coverage
-- middleware improvements
-- session backends
-- template engine features
-- documentation and examples
+Contributions are welcome. Good contribution paths:
+
+1. Framework core
+- middleware capabilities
+- routing enhancements
+- session backend improvements
+
+2. Data and persistence
+- migration tooling
+- better SQLAlchemy utilities
+- database testing coverage
+
+3. Developer experience
+- CLI ergonomics
+- clearer error diagnostics
+- docs and examples
+
+4. Quality and stability
+- regression tests
+- edge-case handling
+- compatibility verification
+
+---
+
+## Future Improvements
+
+Planned next improvements:
+
+1. Database migration commands in CLI (`mallo db init/migrate/upgrade`)
+2. Persistent session backends (Redis/file/cookie strategy)
+3. Route-scoped rate limits and cache policy
+4. Pluggable template engines (e.g., Jinja adapter)
+5. Production observability (request IDs, JSON logs, metrics hooks)

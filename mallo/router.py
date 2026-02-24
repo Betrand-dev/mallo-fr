@@ -18,7 +18,7 @@ class Router:
     def __init__(self):
         self.routes = [] # List of (patterns, handler, methods)
 
-    def add_route(self, path: str, handler: Callable, methods: List[str]):
+    def add_route(self, path: str, handler: Callable, methods: List[str], options: Optional[Dict] = None):
         """
         Add a new route to the router
 
@@ -33,13 +33,15 @@ class Router:
         """
         # Convert path to regex pattern
         pattern = self._path_to_pattern(path)
+        options = options or {}
 
         for method in methods:
             self.routes.append({
                 'pattern': pattern,
                 'handler': handler,
                 'method': method.upper(),
-                'original_path': path
+                'original_path': path,
+                'options': options.copy()
             })
 
     def _path_to_pattern(self, path: str):
@@ -91,7 +93,7 @@ class Router:
         return  regex, param_names
 
 
-    def match(self, path: str, method: str) -> Optional[Tuple[Callable,Dict]]:
+    def match(self, path: str, method: str, return_route: bool = False) -> Optional[Tuple[Callable,Dict]]:
         """
         Match a path and method to a route
 
@@ -124,6 +126,8 @@ class Router:
 
                     kwargs[name] = value
 
+                if return_route:
+                    return route['handler'], kwargs, route
                 return route['handler'], kwargs
 
         return None
@@ -137,7 +141,9 @@ class Router:
         """
         for route in self.routes:
             handler = route['handler']
-            if getattr(handler, '__name__', None) != handler_name:
+            route_name = route.get('options', {}).get('name')
+            resolved_name = route_name or getattr(handler, '__name__', None)
+            if resolved_name != handler_name:
                 continue
 
             path = route['original_path']

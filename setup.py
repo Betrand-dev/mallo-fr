@@ -12,7 +12,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="mallo",
-    version="0.3.0a6",
+    version="0.1.0",
     author="Akum betrand",
     author_email="betrandojong146@gmail.com",
     description="A lightweight web framework with hot reload",

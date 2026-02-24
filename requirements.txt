@@ -1,3 +1,4 @@
 # No external dependencies required for basic functionality
 # Optional dependencies for hot reload
 watchdog>=2.1.0
+sqlalchemy>=2.0.0

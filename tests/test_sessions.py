@@ -81,3 +81,19 @@ def test_sessions_and_csrf():
         body=b''
     ))
     assert status.startswith('403')
+
+
+def test_route_level_csrf_override():
+    app = Mallo(__name__, secret_key='test-secret', csrf_protect=True)
+
+    @app.post('/webhook', csrf=False)
+    def webhook(request):
+        return 'ok'
+
+    status, headers, body = call_app(app, make_environ(
+        '/webhook',
+        'POST',
+        headers={'Content-Type': 'application/x-www-form-urlencoded'},
+        body=b''
+    ))
+    assert status.startswith('200')
