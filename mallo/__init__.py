@@ -10,5 +10,5 @@ from mallo.template import render_template, render_template_file
 from mallo.db import Database
 from mallo.config import MalloConfig
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = ['Mallo', 'Request', 'Response', 'cli', 'render_template', 'render_template_file', 'Database', 'MalloConfig' ]
