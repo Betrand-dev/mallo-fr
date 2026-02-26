@@ -163,6 +163,15 @@ class TemplateEngine:
 
 # Global template engine instance
 _engine = TemplateEngine()
+_default_template_folder = 'templates'
+
+
+def set_default_template_folder(folder: str) -> None:
+    """
+    Set the global default template folder used by render_template().
+    """
+    global _default_template_folder
+    _default_template_folder = folder or 'templates'
 
 def _template_error_page(title: str, message: str, detail: str = "") -> str:
     safe_title = html.escape(title)
@@ -200,7 +209,7 @@ def _template_error_page(title: str, message: str, detail: str = "") -> str:
 
 def render_template(
     template_name: str,
-    template_folder: str = 'templates',
+    template_folder: str | None = None,
     auto_reload: bool = False,
     auto_escape: bool = True,
     **context
@@ -215,14 +224,15 @@ def render_template(
         auto_escape: Escape variables by default
         **context: Context variables for rendering
     """
-    if not os.path.isdir(template_folder):
+    folder = template_folder or _default_template_folder
+    if not os.path.isdir(folder):
         return _template_error_page(
             "Template folder not found",
             "Mallo expected a template folder but it does not exist.",
-            template_folder
+            folder
         )
 
-    template_path = os.path.join(template_folder, template_name)
+    template_path = os.path.join(folder, template_name)
     return render_template_file(
         template_path,
         auto_reload=auto_reload,

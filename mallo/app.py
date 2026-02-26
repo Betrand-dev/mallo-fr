@@ -15,7 +15,7 @@ from wsgiref.simple_server import make_server, WSGIRequestHandler
 from mallo.router import Router
 from mallo.request import Request
 from mallo.response import Response
-from mallo.template import render_template, render_template_file
+from mallo.template import render_template, render_template_file, set_default_template_folder
 from mallo.config import MalloConfig
 from mallo.utils import generate_etag
 from mallo.hot_reload import HotReloader
@@ -79,6 +79,7 @@ class Mallo:
         self.config_obj = MalloConfig(**merged_config)
         self.config = self.config_obj.as_dict()
         self.static_url_path = self.config_obj.get('static_url_path')
+        set_default_template_folder(self.config_obj.get('template_folder'))
         self.router = Router()
         self.hot_reloader = None
         self.debug = self.config_obj.get('debug')
@@ -316,6 +317,18 @@ class Mallo:
             def __delitem__(self, key):
                 self._parent._session_dirty = True
                 return super().__delitem__(key)
+            def clear(self):
+                self._parent._session_dirty = True
+                return super().clear()
+            def pop(self, key, default=None):
+                self._parent._session_dirty = True
+                return super().pop(key, default)
+            def update(self, *args, **kwargs):
+                self._parent._session_dirty = True
+                return super().update(*args, **kwargs)
+            def setdefault(self, key, default=None):
+                self._parent._session_dirty = True
+                return super().setdefault(key, default)
 
         request.session_id = session_id
         request.session = SessionData(request)
@@ -447,9 +460,22 @@ class Mallo:
         return Response(body, status=500)
 
     def _ensure_response(self, result):
-        if not isinstance(result, Response):
-            return Response(result)
-        return result
+        if isinstance(result, Response):
+            return result
+
+        
+        # (body, status) or (body, status, headers)
+        if isinstance(result, tuple):
+            if len(result) == 2:
+                body, status = result
+                return Response(body, status=status)
+            if len(result) == 3:
+                body, status, headers = result
+                return Response(body, status=status, headers=headers)
+            raise ValueError("Invalid response tuple. Use (body, status) or (body, status, headers).")
+
+        # Plain body value.
+        return Response(result)
 
     def _process_outgoing(self, request, response, start_time):
         """
@@ -475,10 +501,10 @@ class Mallo:
         def call_next(req):
             nonlocal index
             if index >= len(middleware_list):
-                return endpoint(req)
+                return self._ensure_response(endpoint(req))
             current = middleware_list[index]
             index += 1
-            return current(req, call_next)
+            return self._ensure_response(current(req, call_next))
 
         return call_next(request)
 

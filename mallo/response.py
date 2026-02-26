@@ -61,11 +61,18 @@ class Response:
         #Encode body if it is a string
         if isinstance(self.body, str):
             return [self.body.encode()]
+        elif isinstance(self.body, bytes):
+            return [self.body]
+        elif isinstance(self.body, bytearray):
+            return [bytes(self.body)]
+        elif self.body is None:
+            return [b'']
         elif isinstance(self.body, (dict, list)):
             # Auto-convert dict/list to json
             return [json.dumps(self.body).encode()]
         else:
-            return [self.body]
+            # Safety fallback for uncommon return types.
+            return [str(self.body).encode()]
 
     def set_cookie(self, key, value='', max_age=None, expires=None, path='/', domain=None, secure=False, httponly=False):
         """
